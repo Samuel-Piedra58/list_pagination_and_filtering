@@ -6,6 +6,7 @@ FSJS project 2 - List Filter and Pagination
 // Globale variables
 // Variable to hold all student list items
 const listItems = document.querySelectorAll("li");
+const pageDiv = document.querySelector(".page");
 // The number of list items to display per page
 const itemsPerPage = 10;
 
@@ -30,41 +31,65 @@ function showPage(list, page) {
   }
 }
 
-/*** 
-   Create the `appendPageLinks function` to generate, append, and add 
-   functionality to the pagination buttons.
-***/
+function findNames(searchTerm) {
+  const students = document.querySelectorAll(".student-details h3");
+  const namesFound = [];
+  for (let i = 0; i < students.length; i++) {
+    const student = students[i];
+    const studentName = student.textContent.toLowerCase();
+    if (studentName.includes(searchTerm.toLowerCase())) {
+      namesFound.push(student.parentNode.parentNode);
+    }
+  }
+  return namesFound;
+}
+
+function createSearchFeature() {
+  const mainDiv = document.querySelector(".page-header");
+  const div = document.createElement("div");
+  const input = document.createElement("input");
+  const button = document.createElement("button");
+
+  div.className = "student-search";
+  input.type = "text";
+  input.setAttribute("placeholder", "Search for students...");
+  button.textContent = "Search";
+
+  mainDiv.appendChild(div);
+  div.appendChild(input);
+  div.appendChild(button);
+}
+
 function appendPageLinks(list) {
-  // pageDiv is the parent div of the ul containing the list items
-  const pageDiv = document.querySelector(".page");
   const div = document.createElement("div");
   const ul = document.createElement("ul");
+  // number of pages necessary given list and set page length
   const pages = Math.ceil(list.length / itemsPerPage);
 
   /*
-    Function createPageLinks(pageNum) returns an a tag with specific attribute
-    and innerHTML properties.
-      pageNum: This paramater corresponds to the index position link will have
-      amongst a collection of a tags
+    Function, createPageLinks(pageNum), returns an a tag with specific attributes/properties
+    pageNum: This paramater corresponds to the page the link will tie to.
   */
   function createPageLinks(pageNum) {
     const a = document.createElement("a");
-    if (pageNum === 0) {
+    if (pageNum === 1) {
       a.className = "active";
     }
     a.setAttribute("href", `#`);
-    a.innerHTML = `${pageNum + 1}`;
+    a.innerHTML = `${pageNum}`;
     return a;
   }
 
   // For each page created, create an li and a element and append them to the ul
-  for (let i = 0; i < pages; i++) {
+  for (let i = 1; i <= pages; i++) {
     const li = document.createElement("li");
     const a = createPageLinks(i);
     li.appendChild(a);
     ul.appendChild(li);
   }
 
+  // The event listener on the ul will listen for click events
+  // that target an A or LI tag.
   ul.addEventListener("click", e => {
     if (e.target.tagName === "A" || e.target.tagName === "LI") {
       const links = ul.querySelectorAll("li a");
@@ -76,7 +101,7 @@ function appendPageLinks(list) {
     }
   });
 
-  // Set newly create div
+  // append new ul to new div
   div.appendChild(ul);
   div.className = "pagination";
 
@@ -84,5 +109,7 @@ function appendPageLinks(list) {
   pageDiv.appendChild(div);
 }
 
+// invoke functions
 showPage(listItems, 1);
 appendPageLinks(listItems);
+createSearchFeature();
