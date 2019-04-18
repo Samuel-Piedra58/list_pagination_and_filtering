@@ -6,7 +6,6 @@ FSJS project 2 - List Filter and Pagination
 // Globale variables
 // Variable to hold all student list items
 const listItems = document.querySelectorAll("li");
-const pageDiv = document.querySelector(".page");
 // The number of list items to display per page
 const itemsPerPage = 10;
 
@@ -41,75 +40,100 @@ function findNames(searchTerm) {
       namesFound.push(student.parentNode.parentNode);
     }
   }
-  return namesFound;
 }
 
-function createSearchFeature() {
+// function createSearchFeature will create the search form in the webpage
+// the function is Immediately invoked
+(function createSearchFeature() {
+  // select and create elements
   const mainDiv = document.querySelector(".page-header");
   const div = document.createElement("div");
   const input = document.createElement("input");
   const button = document.createElement("button");
 
+  // set properties of elements
   div.className = "student-search";
   input.type = "text";
   input.setAttribute("placeholder", "Search for students...");
   button.textContent = "Search";
 
-  mainDiv.appendChild(div);
+  // append elements appropriately
   div.appendChild(input);
   div.appendChild(button);
-}
+  mainDiv.appendChild(div);
+})();
 
+// function appendPageLinks(list) dynamically appends a "div" with a nested "ul"
+// and nested list item and each "li" nested with an "a" tag.
+// the new elements will be the page navigation for showing another 10 results
+// of the list item argument
 function appendPageLinks(list) {
-  const div = document.createElement("div");
-  const ul = document.createElement("ul");
-  // number of pages necessary given list and set page length
+  const pageDiv = document.querySelector(".page");
   const pages = Math.ceil(list.length / itemsPerPage);
 
-  /*
-    Function, createPageLinks(pageNum), returns an a tag with specific attributes/properties
-    pageNum: This paramater corresponds to the page the link will tie to.
-  */
+  // Assign "div" by creating new "div" element or finding "div" in dom and removing its children
+  // This effectively resets the "div"  when the "appendPageLinks(list)" function is called
+  // this is helpful for adjusting the links available on a new list
+  const div = (function() {
+    const div =
+      document.querySelector(".pagination") || document.createElement("div");
+    for (let i = 0; i < div.children.length; i++) {
+      div.removeChild(div.children[i]);
+    }
+    div.className = "pagination";
+    return div;
+  })();
+
+  // Assign "ul" by creating "ul" element or finding "ul" in dom and removing its children
+  // This effectively resets the "ul" when the "appendPageLinks(list)" function is called
+  // this is helpful for adjusting the links available on a new list
+  const ul = (function() {
+    const ul =
+      document.querySelector(".pagination ul") || document.createElement("ul");
+    for (let i = 0; i < ul.children.length; i++) {
+      ul.removeChild(ul.children[i]);
+    }
+    return ul;
+  })();
+
+  // function creates a single "a" tag nested in an "li" tag
+  // with the page number to display as link innerHTML
   function createPageLinks(pageNum) {
     const a = document.createElement("a");
+    const li = document.createElement("li");
     if (pageNum === 1) {
       a.className = "active";
     }
     a.setAttribute("href", `#`);
     a.innerHTML = `${pageNum}`;
-    return a;
+    li.appendChild(a);
+    return li;
   }
 
-  // For each page created, create an li and a element and append them to the ul
+  // For each page created, create an li and an a element and append them to the ul
   for (let i = 1; i <= pages; i++) {
-    const li = document.createElement("li");
-    const a = createPageLinks(i);
-    li.appendChild(a);
+    const li = createPageLinks(i);
     ul.appendChild(li);
   }
 
-  // The event listener on the ul will listen for click events
-  // that target an A or LI tag.
-  ul.addEventListener("click", e => {
-    if (e.target.tagName === "A" || e.target.tagName === "LI") {
+  function changePage(event) {
+    if (event.target.tagName === "A") {
       const links = ul.querySelectorAll("li a");
       for (let i = 0; i < links.length; i++) {
         links[i].className = "";
       }
-      e.target.className = "active";
-      showPage(listItems, e.target.innerHTML);
+      event.target.className = "active";
+      showPage(listItems, event.target.innerHTML);
     }
-  });
+  }
 
-  // append new ul to new div
-  div.appendChild(ul);
   div.className = "pagination";
-
-  // append newly created div to the first div in the body
+  div.appendChild(ul);
   pageDiv.appendChild(div);
+
+  ul.addEventListener("click", changePage);
 }
 
 // invoke functions
 showPage(listItems, 1);
 appendPageLinks(listItems);
-createSearchFeature();
